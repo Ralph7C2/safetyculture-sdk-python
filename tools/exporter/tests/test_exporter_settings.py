@@ -89,7 +89,7 @@ class ExporterTestCase(unittest.TestCase):
 
     def test_return_user_supplied_filename_if_valid(self):
         for i in range(3):
-            config_setting = {'export_options': {'filename': uuid.uuid4()}}
+            config_setting = {'export_options': {'filename': str(uuid.uuid4())}}
             self.assertEqual(exp.get_filename_item_id(logger, config_setting), config_setting['export_options']['filename'])        
 
 if __name__ == '__main__':

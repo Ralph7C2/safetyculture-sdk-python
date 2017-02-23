@@ -30,6 +30,7 @@ DEFAULT_SYNC_DELAY_IN_SECONDS = 900
 # The file that stores the "date modified" of the last successfully synced audit
 SYNC_MARKER_FILENAME = 'last_successful.txt'
 
+GUID_PATTERN = '[A-Fa-f0-9]{8}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{12}$'
 
 def log_critical_error(logger, ex, message):
     """
@@ -281,7 +282,8 @@ def get_filename_item_id(logger, config_settings):
     """
     try:
         filename_item_id = config_settings['export_options']['filename']
-        if filename_item_id is not None:
+        valid_item_id = re.match(GUID_PATTERN, filename_item_id)
+        if filename_item_id is not None and valid_item_id:
             return filename_item_id
         else:
             return None
