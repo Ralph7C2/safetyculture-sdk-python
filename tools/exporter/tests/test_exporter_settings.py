@@ -7,6 +7,8 @@ import sys
 from tzlocal import get_localzone
 import unittest
 
+import uuid
+
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..', 'exporter'))
 import exporter as exp
 
@@ -75,6 +77,20 @@ class ExporterTestCase(unittest.TestCase):
         config_setting = {'sync_delay_in_seconds': 500}
         self.assertEqual(exp.load_setting_sync_delay(logger, config_setting), config_setting['sync_delay_in_seconds'])
 
+    def test_return_None_if_filename_is_missing(self):
+        config_settings = [ {}, '', None, {'export_options': None}, {'export_options': ''}, {'export_options': {'filename': None}}]
+        for config_setting in config_settings:
+            self.assertIsNone(exp.get_filename_item_id(logger, config_setting))
+
+    def test_return_user_supplied_filename_if_invalid(self):
+        config_settings = [{'export_options': {'filename': 'somename'}}, {'export_options': {'filename': 'x'}}]
+        for config_setting in config_settings:
+            self.assertIsNone(exp.get_filename_item_id(logger, config_setting))
+
+    def test_return_user_supplied_filename_if_valid(self):
+        for i in range(3):
+            config_setting = {'export_options': {'filename': uuid.uuid4()}}
+            self.assertEqual(exp.get_filename_item_id(logger, config_setting), config_setting['export_options']['filename'])        
 
 if __name__ == '__main__':
     unittest.main()
