@@ -82,7 +82,7 @@ class ExporterTestCase(unittest.TestCase):
         for config_setting in config_settings:
             self.assertIsNone(exp.get_filename_item_id(logger, config_setting))
 
-    def test_return_user_supplied_filename_if_invalid(self):
+    def test_return_None_supplied_filename_if_invalid(self):
         config_settings = [{'export_options': {'filename': 'somename'}}, {'export_options': {'filename': 'x'}}]
         for config_setting in config_settings:
             self.assertIsNone(exp.get_filename_item_id(logger, config_setting))
