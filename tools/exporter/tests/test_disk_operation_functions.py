@@ -43,7 +43,7 @@ class ExporterDiskFunctionsTestCase(unittest.TestCase):
 
 
     @patch('exporter.os')
-    def test_save_exported_document(self, mock_os):
+    def test_save_exported_document_with_write_successful(self, mock_os):
 
         def mock_isfile(path):
             return True
@@ -58,6 +58,25 @@ class ExporterDiskFunctionsTestCase(unittest.TestCase):
             exp.save_exported_document(logger, 'edir', 'edoc', 'fname', 'ext')
             m.return_value.write.assert_called_with('edoc')
         mock_os.path.join.assert_called_with('edir', 'fname.ext')
+        mock_os.path.isfile.assert_called_with('joined_path')
+
+    @patch('exporter.log_critical_error')
+    @patch('exporter.os')
+    def test_save_exported_document_logs_exception(self, mock_os, mock_log_critical_error):
+        def mock_isfile(path):
+            return False
+        mock_os.path.isfile.side_effect = mock_isfile
+
+        def mock_join(dir, file):
+            return 'joined_path'
+        mock_os.path.join.side_effect = mock_join
+
+        m = mock_open()
+        with patch('exporter.open', m, create=True) as mocked_open:
+            mocked_open.side_effect = IOError()
+            exp.save_exported_document(logger, 'edir', 'edoc', 'fname', 'ext')
+        mock_log_critical_error.assert_called()
+        mock_os.path.join.assert_called_with('edit', 'fname.ext')
         mock_os.path.isfile.assert_called_with('joined_path')
 
 if __name__ == '__main__':
