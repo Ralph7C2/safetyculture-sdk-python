@@ -76,7 +76,7 @@ class ExporterDiskFunctionsTestCase(unittest.TestCase):
             mocked_open.side_effect = IOError()
             exp.save_exported_document(logger, 'edir', 'edoc', 'fname', 'ext')
         mock_log_critical_error.assert_called()
-        mock_os.path.join.assert_called_with('edit', 'fname.ext')
+        mock_os.path.join.assert_called_with('edir', 'fname.ext')
         mock_os.path.isfile.assert_called_with('joined_path')
 
 if __name__ == '__main__':
