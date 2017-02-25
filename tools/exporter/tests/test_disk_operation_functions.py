@@ -4,7 +4,7 @@ import errno
 
 import unittest
 import mock
-from mock import patch
+from mock import patch, mock_open
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..', 'exporter'))
 import exporter as exp
@@ -42,17 +42,8 @@ class ExporterDiskFunctionsTestCase(unittest.TestCase):
             mock_log_critical_error.assert_called()
 
 
-    ###HOW TO MOCK OPEN()
-
-    @patch('exporter.open')
     @patch('exporter.os')
-    def test_save_exported_document(self, mock_os, mock_open):
-        mock_file = mock.Mock()
-        def returns_mock_file(path, action):
-            mock_file.called_path = path
-            mock_file.called_action = action
-            return mock_file
-        mock_open.side_effect = returns_mock_file
+    def test_save_exported_document(self, mock_os):
 
         def mock_isfile(path):
             return True
@@ -62,11 +53,12 @@ class ExporterDiskFunctionsTestCase(unittest.TestCase):
             return 'joined_path'
         mock_os.path.join.side_effect = mock_join
 
-        exp.save_exported_document(logger, 'edir', 'edoc', 'fname', 'ext')
+        m = mock_open()
+        with patch('exporter.open', m, create=True):
+            exp.save_exported_document(logger, 'edir', 'edoc', 'fname', 'ext')
+            m.return_value.write.assert_called_with('edoc')
         mock_os.path.join.assert_called_with('edir', 'fname.ext')
         mock_os.path.isfile.assert_called_with('joined_path')
-        mock_open.assert_called_with('joined_path', 'w')
-        mock_file.write.assert_called_with('edoc')
 
 if __name__ == '__main__':
     unittest.main()
