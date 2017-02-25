@@ -42,5 +42,31 @@ class ExporterDiskFunctionsTestCase(unittest.TestCase):
             mock_log_critical_error.assert_called()
 
 
+    ###HOW TO MOCK OPEN()
+
+    @patch('exporter.open')
+    @patch('exporter.os')
+    def test_save_exported_document(self, mock_os, mock_open):
+        mock_file = mock.Mock()
+        def returns_mock_file(path, action):
+            mock_file.called_path = path
+            mock_file.called_action = action
+            return mock_file
+        mock_open.side_effect = returns_mock_file
+
+        def mock_isfile(path):
+            return True
+        mock_os.path.isfile.side_effect = mock_isfile
+
+        def mock_join(dir, file):
+            return 'joined_path'
+        mock_os.path.join.side_effect = mock_join
+
+        exp.save_exported_document(logger, 'edir', 'edoc', 'fname', 'ext')
+        mock_os.path.join.assert_called_with('edir', 'fname.ext')
+        mock_os.path.isfile.assert_called_with('joined_path')
+        mock_open.assert_called_with('joined_path', 'w')
+        mock_file.write.assert_called_with('edoc')
+
 if __name__ == '__main__':
     unittest.main()
